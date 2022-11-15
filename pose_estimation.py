@@ -10,6 +10,15 @@ import sys
 from utils import ARUCO_DICT
 import argparse
 import time
+import socket
+from scipy.spatial.transform import Rotation as R
+
+UDP_IP = "127.0.0.1"
+UDP_PORT = 8080
+MESSAGE = "Hello, World!"
+
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 
 
 def pose_esitmation(frame, aruco_dict_type, matrix_coefficients, distortion_coefficients):
@@ -30,6 +39,10 @@ def pose_esitmation(frame, aruco_dict_type, matrix_coefficients, distortion_coef
 
     corners, ids, rejected_img_points = cv2.aruco.detectMarkers(gray, cv2.aruco_dict,parameters=parameters)
 
+    rotation_matrix = np.array([[0, 0, 0],
+                                [0, 0, 0],
+                                [0, 0, 0]],
+                                dtype=float)
         # If markers are detected
     if len(corners) > 0:
         for i in range(0, len(ids)):
@@ -37,8 +50,23 @@ def pose_esitmation(frame, aruco_dict_type, matrix_coefficients, distortion_coef
             rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], 0.15, matrix_coefficients,
                                                                        distortion_coefficients)
             # Draw a square around the markers
-            cv2.aruco.drawDetectedMarkers(frame, corners) 
-            print(tvec)
+            cv2.aruco.drawDetectedMarkers(frame, corners, ids,  borderColor=(255, 0, 255)) 
+
+            rotation_matrix[:3, :3], _ = cv2.Rodrigues(rvec)
+            
+            # convert the matrix to a quaternion
+            quaternion  = (R.from_matrix(rotation_matrix)).as_quat()
+            tvec  = tvec.flatten()
+
+            MESSAGE = ""
+            MESSAGE = MESSAGE + '300,'
+            MESSAGE = MESSAGE + str(1) +','
+            MESSAGE = MESSAGE + str(tvec[0]) + ','+ str(tvec[2]) + ',' + str(-tvec[1]) + ','
+            MESSAGE = MESSAGE + str(quaternion[0]) + ',' + str(quaternion[2]) + ','+ str(-quaternion[1]) + ',' + str(quaternion[3]) + ','
+            MESSAGE = MESSAGE + '0.15,'  + '0.15,' +'300'
+            sock.sendto(bytes(MESSAGE, "utf-8"), (UDP_IP, UDP_PORT))
+            print(tvec, quaternion)
+
 
             # Draw Axis
             # cv2.aruco.drawFrameAxes(frame, matrix_coefficients, distortion_coefficients, rvec, tvec, 0.01)  
@@ -83,4 +111,4 @@ if __name__ == '__main__':
             break
 
     video.release()
-    cv2.destroyAllWindow()
+    #cv2.destroyAllWindow()
