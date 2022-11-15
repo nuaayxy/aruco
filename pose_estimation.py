@@ -43,6 +43,9 @@ def pose_esitmation(frame, aruco_dict_type, matrix_coefficients, distortion_coef
                                 [0, 0, 0],
                                 [0, 0, 0]],
                                 dtype=float)
+
+    matrix_coefficients = np.array([[639.4220708709296, 0, 313.1381470208109], [0, 639.8382741580136, 227.5889626380422], [0, 0, 1]])
+    distortion_coefficients = np.array([0.05955764897050855, -0.2713977079670999, -0.001162425174745653, 0.0006810747878762949, 0.326054616229204])
         # If markers are detected
     if len(corners) > 0:
         for i in range(0, len(ids)):
