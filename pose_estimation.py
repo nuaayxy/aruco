@@ -4,6 +4,8 @@ python pose_estimation.py --K_Matrix calibration_matrix.npy --D_Coeff distortion
 '''
 
 
+# python pose_estimation.py --K_Matrix calibration_matrix.npy --D_Coeff distortion_coefficients.npy --type DICT_5X5_1000
+
 import numpy as np
 import cv2
 import sys
@@ -96,9 +98,9 @@ if __name__ == '__main__':
     k = np.load(calibration_matrix_path)
     d = np.load(distortion_coefficients_path)
 
-    video = cv2.VideoCapture(0)
+    video = cv2.VideoCapture(1)
     time.sleep(2.0)
-
+r
     while True:
         ret, frame = video.read()
 
